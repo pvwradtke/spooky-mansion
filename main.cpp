@@ -11,7 +11,24 @@
 #include <c2d2/chienaudio2.h>
 #include "defines.h"
 
-//void DesenhaSpriteReduzido(unsigned int )
+void DesenhaSpriteEscala(unsigned int spriteset, unsigned int frame, int x, int y, 
+        double xproportion, double yproportion);
+
+void DesenhaSpriteEscala(unsigned int spriteset, unsigned int frame, int x, int y, 
+        double xproportion, double yproportion, int yoff)
+{
+    int largura, altura;
+    if(C2D2_DimensoesSprite(spriteset, &largura, &altura))
+    {
+        int xc[4], yc[4];
+        xc[0]=xc[3]=x*xproportion;
+        xc[1]=xc[2]=xc[0]+largura*xproportion;        
+        yc[0]=yc[1]=yoff+y*yproportion;
+        yc[2]=yc[3]=yoff+yc[0]+altura*yproportion;
+        C2D2_DesenhaSpriteEfeito(spriteset, frame, xc, yc, 255, 255, 255, 255);
+    }
+}
+
 
 int main(int ac, char **av) {
     // A resolução da tela
@@ -58,7 +75,8 @@ int main(int ac, char **av) {
             double xprop = (double)width/FULLHD_WIDTH;
             double yprop = (double)height/FULLHD_HEIGHT;
             for(int i=0;i<NUM_CENARIO;i++)
-                C2D2_DesenhaSprite(scene[i], 0, posicoes[i][0], posicoes[i][1]);
+                DesenhaSpriteEscala(scene[i], 0, posicoes[i][0], posicoes[i][1], xprop, yprop, 2);
+                //C2D2_DesenhaSprite(scene[i], 0, posicoes[i][0], posicoes[i][1]);
             C2D2_Sincroniza(C2D2_FPS_PADRAO);
         }
     }
