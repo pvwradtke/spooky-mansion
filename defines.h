@@ -26,6 +26,9 @@ extern "C" {
 #define NUM_CAMINHOS    21
 #define PORTAS_LEMBRAR  2
     
+#define VEL_INI         2
+#define DIV_PLACAR      3
+    
 enum{ LATERAL, VERTICAL};
 
 enum{SEM_PORTA=-1, PORTA_A, PORTA_B, PORTA_C, PORTA_D, PORTA_E, PORTA_F, PORTA_G,

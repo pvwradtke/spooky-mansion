@@ -8,10 +8,20 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <time.h>
 #include <c2d2/chien2d2.h>
 #include <c2d2/chien2d2primitivas.h>
 #include <c2d2/chienaudio2.h>
 #include "defines.h"
+
+// As dimensoes da tela
+int width, height;
+// As proporções da tela
+double xprop;
+double yprop;
+
+// O estado do jogo
+int estado_atual;
 
 No nos[NUM_NOS] = {
     {141, 897, SEM_PORTA, 100}, // 0
@@ -106,7 +116,6 @@ Vizinhos vizinhos[NUM_NOS] = {
 
 };
 
-
 Caminho caminhos[NUM_CAMINHOS] = {
     { PORTA_A, PORTA_B, 9,
         {16, 15, 0, 22, 21, 20, 19, 18, 17}},
@@ -172,8 +181,13 @@ int posicoes[NUM_CENARIO][2] = {
 }; //, {685, 389}, {0, 314}, {1107, 314}, 
 //{683, 328} }; //, {22, 834}, {498, 515}, {1328, 516}, {1843, 838}, {74, 217}, 
 //{674, 71}, {1187, 74}, {1795, 217}};
+// The scenery goes here
+unsigned int scene[NUM_CENARIO];
+
 
 FilaMenina fila;
+
+int recorde = 5;
 
 void IniciaFila(FilaMenina *f);
 bool Enfileira(FilaMenina *f, int porta1, int porta2);
@@ -187,14 +201,8 @@ bool MovimentaJogador(Personagem *p, No *nos, Aresta *arestas, FilaMenina *f);
 void MovimentaMenina(Personagem *p, No *nos, Aresta *arestas, Caminho *caminhos, FilaMenina *f);
 void InverteJogador(Personagem *p);
 bool PortasFantasma(Personagem *p);
-
-typedef struct FilaMenina
-{
-    int fila[PORTAS_LEMBRAR][2];
-    int inicio, fim, tamanho;
-    bool estouro;
-}FilaMenina;
-
+bool PortasSegue(Personagem *p, FilaMenina *f, bool &acertou);
+bool Jogo();
 
 bool Enfileira(FilaMenina *f, int porta1, int porta2)
 {
@@ -368,7 +376,7 @@ void MovimentaMenina(Personagem *p, No *nos, Aresta *arestas, Caminho *caminhos,
     }
 }
 
-void MovimentaJogador(Personagem *p, No *nos, Aresta *arestas, FilaMenina *f) {
+bool MovimentaJogador(Personagem *p, No *nos, Aresta *arestas, FilaMenina *f) {
     C2D2_Botao *teclado = C2D2_PegaTeclas();
     // O movimento é de acordo com o eixo (saco!)
     if (arestas[p->aresta].angulo == LATERAL) {
@@ -526,29 +534,191 @@ bool PortasFantasma(Personagem *p) {
     }
 }
 
-int main(int ac, char **av) {
-    // A resolução da tela
-    int width = NETBOOK_WIDTH;
-    int height = NETBOOK_HEIGHT;
-    // The scenery goes here
-    unsigned int scene[NUM_CENARIO];
+bool PortasSegue(Personagem *p, FilaMenina *f, bool *acertou) {
+    // Por definição, não acertou a porta
+    *acertou=false;
+    // Se o fantasma está numa porta porque acabou de percorrer a distância total
+    if (p->distancia == arestas[p->aresta].distancia && nos[p->no_destino].porta != SEM_PORTA) {
+        // Recupera as portas na fila e verifica se a entrada bate com a atual
+        int porta_atual = nos[p->no_destino].porta;
+        int porta1, porta2;
+        // Tenta tirar da fila. Se falha, é porque o outro personagem ainda
+        // não entrou em nenhuma porta.
+        if (TiraFila(f, &porta1, &porta2)) {
+            // Compara se está entrando na porta certa (1)
+            if (porta1 == porta_atual) {
+                *acertou=true;
+                // Acha em qual nó está essa porta de destino
+                p->no_origem = portas[porta2].no;
+                p->aresta = portas[porta2].aresta;
+                p->direcao = portas[porta2].direcao;
+                p->distancia = 0;
+                if (p->no_origem == arestas[p->aresta].origem)
+                    p->no_destino = arestas[p->aresta].destino;
+                else
+                    p->no_destino = arestas[p->aresta].origem;
+                return true;
+            } else
+                // O cabeção errou a porta
+                return false;
+        } else
+            return false;
+    }
+    return true;
+}
+
+bool Jogo() {
     // O jogador começa no nó 2, indo para a direita
     Personagem jogador = {2, 2, 3, 0, DIREITA};
     // A menina começa no nó 3, indo para a porta F
-    Personagem menina = {2, 2, 3, 0, DIREITA, 4, 3, false};
-    /*    typedef struct Personagem
-    {
-        int aresta;
-        int no_origem, no_destino;
-        int distancia;
-        int direcao;
-        int caminho;
-        int indice;
-        bool invertido;
-    }Personagem;*/
-    //{ PORTA_A, PORTA_F, 5,{16, 15, 1, 2, 3}},  // 4
+    Personagem menina = {3, 3, 4, 0, DIREITA, 4, 4, false};
+    
+    srand(time(NULL));
+    // Recupera o teclado
+    C2D2_Botao *teclado = C2D2_PegaTeclas();
+    bool debuggraph = false;
+    bool debuggirl = false;
+    bool debugcaminho = false;
+    int caminho = 0;
 
-    srand(time_t(NULL));
+
+    int placar = 0;
+    int vezes = VEL_INI;
+    FilaMenina f;
+    IniciaFila(&f);
+    bool errouporta = false;
+    bool estourou = false;
+    int tgameover = 240;
+    while (!teclado[C2D2_ESC].pressionado && !teclado[C2D2_ENCERRA].pressionado) {
+        // Debuggin info
+        if (teclado[C2D2_F1].pressionado)
+            debuggraph = !debuggraph;
+        if (teclado[C2D2_F2].pressionado)
+            debuggirl = !debuggirl;
+        if (teclado[C2D2_F3].pressionado)
+            debugcaminho = !debugcaminho;
+        if (teclado[C2D2_W].pressionado)
+            caminho = (caminho + 1) % NUM_CAMINHOS;
+        if (teclado[C2D2_Q].pressionado)
+            if (--caminho == 0)
+                caminho = 0;
+
+        // Lógica
+        for (int i = 0; i < vezes; i++) {
+            if (!estourou && !errouporta) {
+                MovimentaJogador(&jogador, nos, arestas, &f);
+                MovimentaMenina(&menina, nos, arestas, caminhos, &f);
+            }
+            // Lógica da porta (DEPOIS de mover o personagem)
+            //PortasFantasma(&jogador);
+            bool marcou=false;
+            if (!PortasSegue(&jogador, &f, &marcou) && !errouporta) {
+                errouporta = true;
+                printf("O fantasma errou a porta\n");
+            } 
+            if(marcou){
+                placar++;
+                // Testa se aumenta a velocidade
+                if (vezes < VEL_INI + placar / DIV_PLACAR) {
+                    printf("Speed up!\n");
+                    vezes = VEL_INI + placar / DIV_PLACAR;
+                }
+                if (recorde < placar)
+                    recorde = placar;
+            }
+            if (!estourou) {
+                if (f.estouro) {
+                    printf("O fantasma deixou de seguir a menina.\n");
+                    estourou = true;
+                }
+            }
+        }
+        for (int i = 0; i < NUM_CENARIO; i++) {
+            DesenhaSpriteEscala(scene[i], 0, posicoes[i][0], posicoes[i][1], xprop, yprop, 2);
+            //C2D2_DesenhaSprite(scene[i], 0, posicoes[i][0], posicoes[i][1]);
+        }
+        if (!errouporta)
+            DesenhaPersonagem(&jogador, nos, arestas, xprop, yprop);
+        if (!estourou)
+            DesenhaPersonagem(&menina, nos, arestas, xprop, yprop);
+
+        // Desenha as arestas
+        if (debuggraph) {
+            for (int i = 0; i < NUM_ARESTAS; i++) {
+                int origem = arestas[i].origem;
+                int destino = arestas[i].destino;
+                C2D2P_Linha(nos[origem].x*xprop, nos[origem].y*yprop,
+                        nos[destino].x*xprop, nos[destino].y*yprop,
+                        0, 0, 255);
+            }
+        }
+        // Desenha as arestas 
+        if (debuggirl) {
+            int caminho = menina.caminho;
+
+            for (int i = 0; i < caminhos[caminho].numarestas; i++) {
+
+                int aresta = caminhos[caminho].arestas[i];
+
+                int origem = arestas[aresta].origem;
+                int destino = arestas[aresta].destino;
+                C2D2P_Linha(nos[origem].x*xprop, nos[origem].y*yprop,
+                        nos[destino].x*xprop, nos[destino].y*yprop,
+                        255, 0, 255);
+            }
+        }
+        // Desenha as arestas 
+        if (debugcaminho) {
+            for (int i = 0; i < caminhos[caminho].numarestas; i++) {
+
+                int aresta = caminhos[caminho].arestas[i];
+
+                int origem = arestas[aresta].origem;
+                int destino = arestas[aresta].destino;
+                C2D2P_Linha(nos[origem].x*xprop, nos[origem].y*yprop,
+                        nos[destino].x*xprop, nos[destino].y*yprop,
+                        255, 255, 0);
+            }
+        }
+        if(errouporta || estourou)
+        {
+            if(--tgameover == 0)
+                break;
+        }
+
+        C2D2_Sincroniza(C2D2_FPS_PADRAO);
+    }
+    
+    printf("Quitting\n");
+    if (teclado[C2D2_ENCERRA].pressionado)
+    {
+        C2D2_Sincroniza(C2D2_FPS_PADRAO);
+        return false;
+    }
+    else
+    {
+        C2D2_Sincroniza(C2D2_FPS_PADRAO);
+        return true;
+    }
+
+}
+
+int main(int ac, char **av) {
+    // A resolução da tela
+    width = NETBOOK_WIDTH;
+    height = NETBOOK_HEIGHT;
+    // As proporções da tela
+    xprop = (double) width / FULLHD_WIDTH;
+    yprop = (double) height / FULLHD_HEIGHT;
+
+    // Calcula as distâncias entre as arestas, menos a última, que é o warp zone
+    for (int i = 0; i < NUM_ARESTAS - 1; i++) {
+        int origem = arestas[i].origem;
+        int destino = arestas[i].destino;
+        double distancia = sqrt(pow(nos[origem].x - nos[destino].x, 2) + pow(nos[origem].y - nos[destino].y, 2));
+        arestas[i].distancia = distancia / 2;
+    }
+
     ////////////////////////////
     //tela escolha resolução //
     //////////////////////////
@@ -567,108 +737,14 @@ int main(int ac, char **av) {
         if ((scene[i] = C2D2_CarregaSpriteSet(scenario[i], 0, 0)) == 0)
             erro = true;
     }
-    bool debuggraph = true;
-    bool debuggirl = true;
-    bool debugcaminho = false;
-    int caminho = 0;
-    // Calcula as distâncias entre as arestas, menos a última, que é o warp zone
-    for (int i = 0; i < NUM_ARESTAS - 1; i++) {
-        int origem = arestas[i].origem;
-        int destino = arestas[i].destino;
-        double distancia = sqrt(pow(nos[origem].x - nos[destino].x, 2) + pow(nos[origem].y - nos[destino].y, 2));
-        arestas[i].distancia = distancia / 2;
-    }
-
-    if (!erro) {
-        int vezes = 5;
-        FilaMenina f;
-        IniciaFila(&f);
-        bool errouporta=false;
-        while (!teclado[C2D2_ESC].pressionado && !teclado[C2D2_ENCERRA].pressionado) {
-            // Debuggin info
-            if (teclado[C2D2_F1].pressionado)
-                debuggraph = !debuggraph;
-            if (teclado[C2D2_F2].pressionado)
-                debuggirl = !debuggirl;
-            if (teclado[C2D2_F3].pressionado)
-                debugcaminho = !debugcaminho;
-            if (teclado[C2D2_W].pressionado)
-                caminho = (caminho + 1) % NUM_CAMINHOS;
-            if (teclado[C2D2_Q].pressionado)
-                if (--caminho == 0)
-                    caminho = 0;
-
-            // Lógica
-            for (int i = 0; i < vezes; i++) {
-                if(!f.estouro && !errouporta)
-                {
-                        MovimentaJogador(&jogador, nos, arestas, &f);
-                        MovimentaMenina(&menina, nos, arestas, caminhos, &f);
-                }
-                // Lógica da porta (DEPOIS de mover o personagem)
-                PortasFantasma(&jogador);
-            }
-            // As proporções da tela
-            double xprop = (double) width / FULLHD_WIDTH;
-            double yprop = (double) height / FULLHD_HEIGHT;
-            for (int i = 0; i < NUM_CENARIO; i++) {
-                DesenhaSpriteEscala(scene[i], 0, posicoes[i][0], posicoes[i][1], xprop, yprop, 2);
-                //C2D2_DesenhaSprite(scene[i], 0, posicoes[i][0], posicoes[i][1]);
-            }
-            if(!errouporta)
-                DesenhaPersonagem(&jogador, nos, arestas, xprop, yprop);
-            if(!f.estouro)
-                DesenhaPersonagem(&menina, nos, arestas, xprop, yprop);
-
-            // Desenha as arestas
-            if (debuggraph) {
-                for (int i = 0; i < NUM_ARESTAS; i++) {
-                    int origem = arestas[i].origem;
-                    int destino = arestas[i].destino;
-                    C2D2P_Linha(nos[origem].x*xprop, nos[origem].y*yprop,
-                            nos[destino].x*xprop, nos[destino].y*yprop,
-                            0, 0, 255);
-                }
-            }
-            // Desenha as arestas 
-            if (debuggirl) {
-                int caminho = menina.caminho;
-
-                for (int i = 0; i < caminhos[caminho].numarestas; i++) {
-
-                    int aresta = caminhos[caminho].arestas[i];
-
-                    int origem = arestas[aresta].origem;
-                    int destino = arestas[aresta].destino;
-                    C2D2P_Linha(nos[origem].x*xprop, nos[origem].y*yprop,
-                            nos[destino].x*xprop, nos[destino].y*yprop,
-                            255, 0, 255);
-                }
-            }
-            // Desenha as arestas 
-            if (debugcaminho) {
-                for (int i = 0; i < caminhos[caminho].numarestas; i++) {
-
-                    int aresta = caminhos[caminho].arestas[i];
-
-                    int origem = arestas[aresta].origem;
-                    int destino = arestas[aresta].destino;
-                    C2D2P_Linha(nos[origem].x*xprop, nos[origem].y*yprop,
-                            nos[destino].x*xprop, nos[destino].y*yprop,
-                            255, 255, 0);
-                }
-            }
-
-
-            C2D2_Sincroniza(C2D2_FPS_PADRAO);
+    bool roda=true;
+    if(!erro)
+    {
+        while (roda) {
+            roda=Jogo();
         }
     }
-/*   if(teclado[C2D2_ENCERRA].pressionado)
-        return false;
-    else
-        return true;
- */
-    printf("Quitting\n");
+    printf("Exiting game\n");
     // Encerra tudo
     CA2_Encerra();
     C2D2_Encerra();
