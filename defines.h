@@ -23,7 +23,9 @@ extern "C" {
 #define NUM_CENARIO     1
 #define NUM_NOS         23
 #define NUM_ARESTAS     23
-
+#define NUM_CAMINHOS    21
+#define PORTAS_LEMBRAR  2
+    
 enum{ LATERAL, VERTICAL};
 
 enum{SEM_PORTA=-1, PORTA_A, PORTA_B, PORTA_C, PORTA_D, PORTA_E, PORTA_F, PORTA_G,
@@ -69,8 +71,15 @@ typedef struct Caminho
     int origem;
     int destino;
     int numarestas;
-    int arestas[12];
+    int arestas[13];
 }Caminho;
+
+typedef struct FilaMenina
+{
+    int fila[PORTAS_LEMBRAR][2];
+    int inicio, fim, tamanho;
+    bool estouro;
+}FilaMenina;
     
 #ifdef	__cplusplus
 }
