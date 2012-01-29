@@ -168,7 +168,8 @@ Caminho caminhos[NUM_CAMINHOS] = {
 };
 
 // The files to load
-char scenario[NUM_CENARIO][30] = {"./graphics/screenshot.png"}; //, "./graphics/back_stairs.png",
+char scenario[NUM_CENARIO][50] = {"./graphics/layout_final_background.png",
+        "./graphics/layout_final_bridge.png"}; //, "./graphics/back_stairs.png",
 //"./graphics/rails_left.png", "./graphics/rails_right.png",
 //"./graphics/rails_middle.png"};//, "./graphics/door_a.png",
 //"./graphics/door_b.png", "./graphics/door_c.png", "./graphics/door_d.png",
@@ -184,6 +185,11 @@ int posicoes[NUM_CENARIO][2] = {
 // The scenery goes here
 unsigned int scene[NUM_CENARIO];
 
+unsigned int spgirl, spghost;
+
+unsigned int fonte;
+
+unsigned int abertura, start, overporta, overestouro;
 
 FilaMenina fila;
 
@@ -196,7 +202,7 @@ bool TiraFila(FilaMenina *f, int *porta1, int *porta2);
 void DesenhaSpriteEscala(unsigned int spriteset, unsigned int frame, int x, int y,
         double xproportion, double yproportion);
 
-void DesenhaPersonagem(Personagem *p, No *nos, Aresta *arestas, double xproportion, double yproportion);
+void DesenhaPersonagem(unsigned int sprite, Personagem *p, No *nos, Aresta *arestas, double xproportion, double yproportion);
 bool MovimentaJogador(Personagem *p, No *nos, Aresta *arestas, FilaMenina *f);
 void MovimentaMenina(Personagem *p, No *nos, Aresta *arestas, Caminho *caminhos, FilaMenina *f);
 void InverteJogador(Personagem *p);
@@ -259,23 +265,48 @@ void DesenhaSpriteEscala(unsigned int spriteset, unsigned int frame, int x, int 
     }
 }
 
-void DesenhaPersonagem(Personagem *p, No *nos, Aresta *arestas, double xproportion, double yproportion) {
+void DesenhaPersonagem(unsigned int sprite, Personagem *p, No *nos, Aresta *arestas, double xproportion, double yproportion) {
     // Escolhe se é na horizontal ou na vertical a aresta
     int xpers, ypers;
     int origem, destino;
-    static bool cor = true;
-
+    
     origem = p->no_origem;
     destino = p->no_destino;
     xpers = nos[origem].x + ((double) p->distancia / arestas[p->aresta].distancia)*
             (nos[destino].x - nos[origem].x);
     ypers = nos[origem].y + ((double) p->distancia / arestas[p->aresta].distancia)*
             (nos[destino].y - nos[origem].y);
-    if (cor)
+    // Atualiza os frames do personagem
+    p->delay++;
+    if(p->delay >= p->framedelay)
+    {
+        p->delay = 0;
+        p->frame = (p->frame+1)%p->totalframes;
+    }
+    if (!sprite)
         C2D2P_CirculoPintado(xpers * xproportion, ypers * yproportion, 30 * xproportion, 255, 0, 0);
     else
-        C2D2P_CirculoPintado(xpers*xproportion, ypers*yproportion, 30 * xproportion, 0, 255, 0);
-    cor = !cor;
+    {
+        int base=0;
+        switch(p->direcao)
+        {
+            case DIREITA:
+                base = 2;
+                break;
+            case ESQUERDA:
+                base = 0;
+                break;
+            case CIMA:
+                base = 3;
+                break;
+            case BAIXO:
+                base = 1;
+                break;
+        }
+        DesenhaSpriteEscala(sprite, (base*p->totalframes)+p->frames[p->frame], xpers-p->xgravidade, ypers-p->ygravidade, xproportion, yproportion,0);
+        //C2D2_DesenhaSprite(sprite, p->frame, (xpers-p->xgravidade)*xproportion, (ypers-p->ygravidade)*yproportion);
+        //C2D2P_CirculoPintado(xpers*xproportion, ypers*yproportion, 30 * xproportion, 0, 255, 0);
+    }
 }
 
 void InverteJogador(Personagem *p) {
@@ -296,6 +327,22 @@ void InverteJogador(Personagem *p) {
 void MovimentaMenina(Personagem *p, No *nos, Aresta *arestas, Caminho *caminhos, FilaMenina *f) {
     int origem = arestas[p->aresta].origem;
     int destino = arestas[p->aresta].destino;
+        
+    if(arestas[p->aresta].angulo==LATERAL)
+    {
+        if(nos[p->no_origem].x < nos[p->no_destino].x)
+            p->direcao = DIREITA;
+        else
+            p->direcao = ESQUERDA;
+    }
+    else
+    {
+        if(nos[p->no_origem].y < nos[p->no_destino].y)
+            p->direcao = BAIXO;
+        else
+            p->direcao = CIMA;
+    }
+                
     // Aumenta a distância
     if (p->distancia < arestas[p->aresta].distancia)
         p->distancia++;
@@ -536,7 +583,7 @@ bool PortasFantasma(Personagem *p) {
 
 bool PortasSegue(Personagem *p, FilaMenina *f, bool *acertou) {
     // Por definição, não acertou a porta
-    *acertou=false;
+    *acertou = false;
     // Se o fantasma está numa porta porque acabou de percorrer a distância total
     if (p->distancia == arestas[p->aresta].distancia && nos[p->no_destino].porta != SEM_PORTA) {
         // Recupera as portas na fila e verifica se a entrada bate com a atual
@@ -547,7 +594,7 @@ bool PortasSegue(Personagem *p, FilaMenina *f, bool *acertou) {
         if (TiraFila(f, &porta1, &porta2)) {
             // Compara se está entrando na porta certa (1)
             if (porta1 == porta_atual) {
-                *acertou=true;
+                *acertou = true;
                 // Acha em qual nó está essa porta de destino
                 p->no_origem = portas[porta2].no;
                 p->aresta = portas[porta2].aresta;
@@ -569,10 +616,32 @@ bool PortasSegue(Personagem *p, FilaMenina *f, bool *acertou) {
 
 bool Jogo() {
     // O jogador começa no nó 2, indo para a direita
-    Personagem jogador = {2, 2, 3, 0, DIREITA};
+    Personagem jogador = {2, 2, 3, 0, DIREITA, 146, 126};
+    jogador.frame = 0;
+    jogador.delay = 0;
+    jogador.frames[0] = 0;
+    jogador.frames[1] = 1;
+    jogador.frames[2] = 2;
+    jogador.frames[3] = 3;
+    jogador.totalframes = 4;
+    jogador.framedelay = 15;
     // A menina começa no nó 3, indo para a porta F
-    Personagem menina = {3, 3, 4, 0, DIREITA, 4, 4, false};
-    
+    Personagem menina = {3, 3, 4, 0, DIREITA,
+        128, 168, 4, 4, false};
+    //aresta; - no_origem -  no_destino - distancia - direcao -xgravidade, ygravidade;caminho - indice - invertido
+    menina.frame = 0;
+    menina.delay = 0;
+    menina.frames[0] = 0;
+    menina.frames[1] = 1;
+    menina.frames[2] = 2;
+    menina.frames[3] = 3;
+    menina.totalframes = 4;
+    menina.framedelay = 15;
+    /*int frame;    
+    int frames[10];
+    int totalframes;
+    int framedelay;    */
+
     srand(time(NULL));
     // Recupera o teclado
     C2D2_Botao *teclado = C2D2_PegaTeclas();
@@ -589,6 +658,8 @@ bool Jogo() {
     bool errouporta = false;
     bool estourou = false;
     int tgameover = 240;
+    char texto[100];
+    int inicio=240;
     while (!teclado[C2D2_ESC].pressionado && !teclado[C2D2_ENCERRA].pressionado) {
         // Debuggin info
         if (teclado[C2D2_F1].pressionado)
@@ -611,12 +682,12 @@ bool Jogo() {
             }
             // Lógica da porta (DEPOIS de mover o personagem)
             //PortasFantasma(&jogador);
-            bool marcou=false;
+            bool marcou = false;
             if (!PortasSegue(&jogador, &f, &marcou) && !errouporta) {
                 errouporta = true;
                 printf("O fantasma errou a porta\n");
-            } 
-            if(marcou){
+            }
+            if (marcou) {
                 placar++;
                 // Testa se aumenta a velocidade
                 if (vezes < VEL_INI + placar / DIV_PLACAR) {
@@ -634,13 +705,20 @@ bool Jogo() {
             }
         }
         for (int i = 0; i < NUM_CENARIO; i++) {
+            
+            if (i == 1) {
+                if (!errouporta && (jogador.aresta == 12 || jogador.aresta == 11))
+                    DesenhaPersonagem(spghost, &jogador, nos, arestas, xprop, yprop);
+                if (!estourou && (menina.aresta == 12 || menina.aresta == 11))
+                    DesenhaPersonagem(spgirl, &menina, nos, arestas, xprop, yprop);
+            }
             DesenhaSpriteEscala(scene[i], 0, posicoes[i][0], posicoes[i][1], xprop, yprop, 2);
             //C2D2_DesenhaSprite(scene[i], 0, posicoes[i][0], posicoes[i][1]);
         }
-        if (!errouporta)
-            DesenhaPersonagem(&jogador, nos, arestas, xprop, yprop);
-        if (!estourou)
-            DesenhaPersonagem(&menina, nos, arestas, xprop, yprop);
+        if (!errouporta && jogador.aresta != 12 && jogador.aresta != 11)
+            DesenhaPersonagem(spghost, &jogador, nos, arestas, xprop, yprop);
+        if (!estourou && menina.aresta != 12 && menina.aresta != 11)
+            DesenhaPersonagem(spgirl, &menina, nos, arestas, xprop, yprop);
 
         // Desenha as arestas
         if (debuggraph) {
@@ -680,23 +758,34 @@ bool Jogo() {
                         255, 255, 0);
             }
         }
-        if(errouporta || estourou)
-        {
-            if(--tgameover == 0)
+        // Desenha o placar
+/*        sprintf(texto, "Score: %03i", placar);
+        C2D2_DesenhaTexto(fonte, 10,10, texto, C2D2_TEXTO_ESQUERDA);
+        sprintf(texto, "Record: %03i", recorde);
+        C2D2_DesenhaTexto(fonte, 1070,10, texto, C2D2_TEXTO_DIREITA);*/
+        
+        if (errouporta || estourou) {
+            if (--tgameover == 0)
                 break;
+            if(errouporta)
+                DesenhaSpriteEscala(overporta, 0, 686, 502, xprop, yprop, 0);
+            if(estourou)
+                DesenhaSpriteEscala(overestouro, 0, 742, 498, xprop, yprop, 0);
+        }
+        if(inicio>0)
+        {
+            inicio--;
+            DesenhaSpriteEscala(start, 0, 769, 465, xprop, yprop, 0);
         }
 
         C2D2_Sincroniza(C2D2_FPS_PADRAO);
     }
-    
+
     printf("Quitting\n");
-    if (teclado[C2D2_ENCERRA].pressionado)
-    {
+    if (teclado[C2D2_ENCERRA].pressionado) {
         C2D2_Sincroniza(C2D2_FPS_PADRAO);
         return false;
-    }
-    else
-    {
+    } else {
         C2D2_Sincroniza(C2D2_FPS_PADRAO);
         return true;
     }
@@ -737,11 +826,43 @@ int main(int ac, char **av) {
         if ((scene[i] = C2D2_CarregaSpriteSet(scenario[i], 0, 0)) == 0)
             erro = true;
     }
-    bool roda=true;
-    if(!erro)
-    {
+    if ((spgirl = C2D2_CarregaSpriteSet("./graphics/girl_50p.png", 246, 273)) == 0)
+        erro = true;
+    if ((spghost = C2D2_CarregaSpriteSet("./graphics/ghost_50p.png", 246, 273)) == 0)
+        erro = true;
+    if ((abertura = C2D2_CarregaSpriteSet("./graphics/title2.jpg",0,0)) == 0)
+        erro = true;
+    if ((start = C2D2_CarregaSpriteSet("./graphics/start.png",0,0)) == 0)
+        erro = true;
+    if ((overporta = C2D2_CarregaSpriteSet("./graphics/over_porta.png",0,0)) == 0)
+        erro = true;
+    if ((overestouro = C2D2_CarregaSpriteSet("./graphics/over_estouro.png",0,0)) == 0)
+        erro = true;
+    
+    bool roda = true;
+    if (!erro) {
+    
+    //C2D2_Sincroniza(C2D2_FPS_PADRAO);
+    //C2D2_Pausa(3000);
+
+        int estado = TELA_MENU;
         while (roda) {
-            roda=Jogo();
+            switch (estado) {
+                case TELA_JOGO:
+                    roda = Jogo();
+                    estado = TELA_MENU;
+                    break;
+
+                case TELA_MENU:
+                    DesenhaSpriteEscala(abertura, 0, 0, 0, xprop, yprop,0);
+                    C2D2_Sincroniza(C2D2_FPS_PADRAO);
+                    if(teclado[C2D2_ESC].pressionado)
+                        roda=false;
+                    if(teclado[C2D2_ESPACO].pressionado || teclado[C2D2_ENTER].pressionado)
+                        estado = TELA_JOGO;
+                    break;
+
+            }
         }
     }
     printf("Exiting game\n");

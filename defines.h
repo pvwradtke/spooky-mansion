@@ -20,7 +20,7 @@ extern "C" {
 #define NETBOOK_HEIGHT  600
 #define DESKTOP_WIDTH   1280
 #define DESKTOP_HEIGHT  1024
-#define NUM_CENARIO     1
+#define NUM_CENARIO     2
 #define NUM_NOS         23
 #define NUM_ARESTAS     23
 #define NUM_CAMINHOS    21
@@ -64,9 +64,16 @@ typedef struct Personagem
     int no_origem, no_destino;
     int distancia;
     int direcao;
+    int xgravidade, ygravidade;
     int caminho;
     int indice;
     bool invertido;
+
+    int frame;    
+    int delay;
+    int frames[10];
+    int totalframes;
+    int framedelay;
 }Personagem;
     
 typedef struct Caminho
@@ -84,6 +91,8 @@ typedef struct FilaMenina
     bool estouro;
 }FilaMenina;
     
+enum {TELA_SPLASD, TELA_MENU, TELA_ABOUT, TELA_HELP, TELA_JOGO};
+
 #ifdef	__cplusplus
 }
 #endif
