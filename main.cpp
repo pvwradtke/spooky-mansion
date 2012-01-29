@@ -12,130 +12,131 @@
 #include <c2d2/chienaudio2.h>
 #include "defines.h"
 
-No nos[NUM_NOS] = {{24, 981, PORTA_A, 100},     // 0
-                {426, 993, SEM_PORTA, 100},     // 1
-                {945, 984, SEM_PORTA, 100},     // 2
-                {1428, 987, SEM_PORTA, 100},    // 3
-                {1869, 999, PORTA_D, 100},      // 4
-                {537, 747, SEM_PORTA, 70},      // 5
-                {1374, 744, SEM_PORTA, 70},     // 6
-                {558, 645, PORTA_B, 67},        // 7
-                {1368, 642, PORTA_C, 67},       // 8
-                {84, 378, PORTA_E, 90},         // 9
-                {168, 447, SEM_PORTA, 90},      // 10
-                {288, 252, SEM_PORTA, 65},      // 11
-                {702, 297, SEM_PORTA, 65},      // 12
-                {717, 213, PORTA_F, 60},        // 13
-                {969, 312, SEM_PORTA, 65},      // 14
-                {1227, 309, SEM_PORTA, 65},     // 15
-                {1221, 219, PORTA_G, 60},       // 16
-                {1623, 279, SEM_PORTA, 65},     // 17
-                {1782, 477, SEM_PORTA, 90},     // 18
-                {1854, 408, PORTA_H, 90}        // 19
+No nos[NUM_NOS] = {{141, 897, SEM_PORTA, 100},     // 0
+                {460, 784, SEM_PORTA, 100},     // 1
+                {644, 711, SEM_PORTA, 100},     // 2
+                {1314, 494, SEM_PORTA, 100},    // 3
+                {1422, 429, PORTA_F, 100},      // 4
+                {1450, 592, SEM_PORTA, 100},      // 5
+                {1587, 819, SEM_PORTA, 100},     // 6
+                {1716, 752, PORTA_G, 100},        // 7
+                {1101, 1152, SEM_PORTA, 100},       // 8
+                {939, 915, SEM_PORTA, 100},         // 9
+                {585, 1095, PORTA_C, 100},      // 10
+                {1206, 738, PORTA_E, 100},      // 11
+                {741, 573, SEM_PORTA, 100},      // 12
+                {1122, 360, SEM_PORTA, 100},        // 13
+                {1197, 297, PORTA_D, 100},      // 14
+                {213, 297, SEM_PORTA, 100},     // 15
+                {132, 63, PORTA_A, 100},       // 16
+                {480, 111, PORTA_B, 100},     // 17
+                {513, 210, SEM_PORTA, 100},     // 18
+                {678, 144, SEM_PORTA, 100},        // 19
+                {1200, -160, SEM_PORTA, 100},        // 20
+                {1698, 120, SEM_PORTA, 100},        // 21
+                {1824, 12, SEM_PORTA, 100}        // 22
 };
 
-Porta portas[NUM_PORTAS] = { {0, DIREITA, 0}, {7, BAIXO, 3}, {8, BAIXO, 8}, {4, ESQUERDA, 6}, 
-        {9, DIREITA, 19}, {13, BAIXO, 16}, {16, BAIXO, 11}, {19, ESQUERDA, 14}};
+Porta portas[NUM_PORTAS] = { {16, BAIXO, 16}, {17, BAIXO, 17}, {10, DIREITA, 10}, 
+{14, ESQUERDA, 14}, {11, ESQUERDA, 9}, {4, ESQUERDA, 3}, {7, ESQUERDA, 6}};
 
 Aresta arestas[NUM_ARESTAS] ={
     {50, LATERAL, 0, 1},        // I    0
     {50, LATERAL, 1, 2},        // II   1
-    {50, VERTICAL, 1, 5},       // III  2
-    {50, VERTICAL, 5, 7},       // IV   3
-    {50, LATERAL, 5, 6},        // V    4
-    {50, LATERAL, 2, 3},        // VI   5
-    {50, LATERAL, 3, 4},        // VII  6
-    {50, VERTICAL, 3, 6},       // VIII 7
-    {50, VERTICAL, 6, 8},       // IX   8
-    {50, VERTICAL, 2, 14},      // X    9
-    {50, LATERAL, 14, 15},      // XI   10
-    {50, VERTICAL, 15, 16},     // XII  11
-    {50, LATERAL, 15, 17},      // XIII 12
-    {50, LATERAL, 17, 18},      // XIV  13
-    {50, VERTICAL, 18, 19},     // XV   14
-    {50, LATERAL, 14, 12},      // XVI  15
-    {50, VERTICAL, 12, 13},     // XVII 16
-    {50, LATERAL, 12, 11},      // XVIII        17
-    {50, LATERAL, 11, 10},      // XIX  18
-    {50, VERTICAL, 10, 9}       // XX   19
+    {50, LATERAL, 2, 3},       // III  2
+    {50, LATERAL, 3, 4},       // IV   3
+    {50, VERTICAL, 3, 5},        // V    4
+    {50, VERTICAL, 5, 6},        // VI   5
+    {50, LATERAL, 6, 7},        // VII  6
+    {50, LATERAL, 6, 8},       // VIII 7
+    {50, VERTICAL, 8, 9},       // IX   8
+    {50, LATERAL, 9, 11},      // X    9
+    {50, LATERAL, 9, 10},      // XI   10
+    {50, VERTICAL, 9, 12},     // XII  11
+    {50, LATERAL, 12, 13},      // XIII 12
+    {50, VERTICAL, 13, 3},      // XIV  13
+    {50, LATERAL, 13, 14},     // XV   14
+    {50, VERTICAL, 1, 15},      // XVI  15
+    {50, VERTICAL, 15, 16},     // XVII 16
+    {50, VERTICAL, 17, 18},      // XVIII        17
+    {50, LATERAL, 18, 19},      // XIX  18
+    {50, LATERAL, 19, 20},       // XX   19
+    {50, VERTICAL, 20, 21},       // XXI   20
+//    {50, VERTICAL, 21, 23},       // XXII  21
+    {50, LATERAL, 21, 22},       // XXIII   21
+    {1, LATERAL, 22, 0}        // XXIV 22 ===>>> WARP ZONE
 };
 // Os vizinhos de um nó em cada direção
 //cima, baixo, esquerda, direita;
-Vizinhos vizinhos[NUM_NOS]={ {-1, -1, -1, 0},   // 0
-                             {2, -1, 0, 1},     // 1
-                             {9, -1, 1, 5},     // 2
-                             {7, -1, 5, 6},     // 3
-                             {-1, -1, 6, -1},   // 4
-                             {3, 2, -1, 4},     // 5
-                             {8, 7, 4, -1},     // 6
-                             {-1, 3, -1, -1},   // 7
-                             {-1, 8, -1, -1},   // 8
-                             {-1, -1, -1, 19},  // 9
-                             {18, -1, 19, -1},  // 10
-                             {-1, 18, -1, 17},  // 11
-                             {16, -1, 17, 15},  // 12
-                             {-1, 16, -1, -1},  // 13
-                             {-1, 9, 15, 10},   // 14
-                             {11, -1, 10, 12},  // 15
-                             {-1, 11, -1, -1},  // 16
-                             {-1, 13, 12, -1},  // 17
-                             {13, -1, -1, 14},  // 18
-                             {-1, -1, 14, -1}   // 19
+Vizinhos vizinhos[NUM_NOS]={ {-1, -1, 22, 0},   // 0
+                             {15, -1, 0, 2},     // 1
+                             {-1, -1, 1, 2},     // 2
+                             {13, 4, 2, 3},     // 3
+                             {-1, -1, 3, -1},   // 4
+                             {4, 5, -1, -1},     // 5
+                             {5, -1, 7, 6},     // 6
+                             {-1, 6, -1, -1},   // 7
+                             {8, -1, -1, 7},   // 8
+                             {11, 8, 10, 9},  // 9
+                             {-1, -1, -1, 9},  // 10
+                             {-1, -1, 9, -1},  // 11
+                             {-1, 11, -1, 12},  // 12
+                             {-1, 13, 12, 14},  // 13
+                             {-1,-1, 14, -1},   // 14
+                             {16, 15, -1, -1},  // 15
+                             {-1, 16, -1, -1},  // 16
+                             {-1, 17, -1, -1},  // 17
+                             {17, -1, -1, 18},  // 18
+                             {-1, -1, 18, 19},   // 19
+                             
+                             {-1, -1, 19, 20},  // 20
+                             {-1, -1, 20, 21},  // 21
+                             {-1, -1, 21, 22},  // 22
+
+                             
 };
 
-Caminho caminhos[22]={
-    { PORTA_A, PORTA_B, 3,{0, 2, 3}},
-    { PORTA_A, PORTA_C, 4,{0, 2, 4, 8}},
-    { PORTA_A, PORTA_D, 4,{0, 1, 5, 6}},
-    { PORTA_A, PORTA_E, 7,{0, 1, 9, 15, 17, 18, 19}},
-    { PORTA_A, PORTA_F, 5,{0, 1, 9, 15, 16}},
-    { PORTA_A, PORTA_G, 5,{0, 1, 9, 10, 11}},
-    { PORTA_A, PORTA_H, 7,{0, 1, 9, 10, 12, 13, 14}},
+Caminho caminhos[21]={
+    { PORTA_A, PORTA_B, 8,{16, 15, 0,20,19,18,17}},
+    { PORTA_A, PORTA_C, 9,{16, 15, 1, 2,4,5,7,8,9,10}},
+    { PORTA_A, PORTA_D, 6,{16, 15, 1, 2,13,14}},
+    { PORTA_A, PORTA_E, 8,{16, 15, 1, 2, 13, 12, 11,9}},
+    { PORTA_A, PORTA_F, 5,{16, 15, 1, 2, 3}},
+    { PORTA_A, PORTA_G, 7,{16, 15, 1, 2, 4,5,6}},
     
-    { PORTA_B, PORTA_C, 3,{3, 4, 8}},
-    { PORTA_B, PORTA_D, 4,{3, 4, 7, 6}},
-    { PORTA_B, PORTA_E, 8,{3, 2, 1, 9, 15, 17, 18, 19}},
-    { PORTA_B, PORTA_F, 6,{3, 2, 1, 9, 15, 16}},
-    { PORTA_B, PORTA_G, 6,{3, 2, 1, 9, 10, 11}},
-    { PORTA_B, PORTA_H, 8,{3, 2, 1, 9, 10, 12, 13, 14}},
+    { PORTA_B, PORTA_C, 12,{17, 18, 19,20,22,0,1,2,13,12,11,10}},
+    { PORTA_B, PORTA_D, 10,{17, 18, 19,20,22,0,1,2,13,14}},
+    { PORTA_B, PORTA_E, 12,{17, 18, 19,20,22,0,1,2,13,12,11,9}},
+    { PORTA_B, PORTA_F, 9,{17, 18, 19,20,22,0,1,2,3}},
+    { PORTA_B, PORTA_G, 11,{17, 18, 19,20,22,0,1,2,4,5,6}},
     
-    { PORTA_C, PORTA_D, 3,{8, 7, 6}},
-    { PORTA_C, PORTA_E, 8,{8, 7, 5, 9, 15, 17, 18, 19}},
-    { PORTA_C, PORTA_F, 6,{8, 7, 5, 9, 15, 16}},
-    { PORTA_C, PORTA_G, 6,{8, 7, 5, 9, 10, 11}},
-    { PORTA_C, PORTA_H, 8,{8, 7, 5, 9, 10, 12, 13, 14}},
+    { PORTA_C, PORTA_D, 4,{10, 11, 12,14}},
+    { PORTA_C, PORTA_E, 2,{10,9}},
+    { PORTA_C, PORTA_F, 5,{10,11,12,13,4}},
+    { PORTA_C, PORTA_G, 4,{10,8,7,6}},
     
-    { PORTA_D, PORTA_E, 7,{6, 5, 9, 15, 17, 18, 19}},
-    { PORTA_D, PORTA_F, 5,{6, 5, 9, 15, 16}},
-    { PORTA_D, PORTA_G, 5,{6, 5, 9, 10, 11}},
-    { PORTA_D, PORTA_E, 7,{6, 5, 9, 10, 13, 14, 15}},
+    { PORTA_D, PORTA_E, 4,{14,12,11,9}},
+    { PORTA_D, PORTA_F, 3,{14,13,3}},
+    { PORTA_D, PORTA_G, 5,{14,13,4,5,6}},
     
-    { PORTA_E, PORTA_F, 4,{19, 18, 17, 16}},
-    { PORTA_E, PORTA_G, 6,{19, 18, 17, 15, 10, 11}},
-    { PORTA_E, PORTA_H, 8,{19, 18, 17, 15, 10, 12, 13, 14}},
+    { PORTA_E, PORTA_F, 5,{9,11,12,13,3}},
+    { PORTA_E, PORTA_G, 4,{9,8,7,6}},
     
-    { PORTA_F, PORTA_G, 4,{16, 15, 10, 11}},
-    { PORTA_F, PORTA_H, 6,{16, 15, 10, 12, 13, 14}},
+    { PORTA_F, PORTA_G, 4,{3,4,5,6}}
     
-    { PORTA_G, PORTA_H, 4,{11, 12, 13 ,14}}
 };
-
-    int origem;
-    int destino;
-    int numarestas;
-    int arestas[8];
 
 // The files to load
-char scenario[NUM_CENARIO][30] = {"./graphics/back_main.png", "./graphics/back_stairs.png",
-        "./graphics/rails_left.png", "./graphics/rails_right.png",
-        "./graphics/rails_middle.png"};//, "./graphics/door_a.png",
+char scenario[NUM_CENARIO][30] = {"./graphics/screenshot.png"}; //, "./graphics/back_stairs.png",
+        //"./graphics/rails_left.png", "./graphics/rails_right.png",
+        //"./graphics/rails_middle.png"};//, "./graphics/door_a.png",
         //"./graphics/door_b.png", "./graphics/door_c.png", "./graphics/door_d.png",
         //"./graphics/door_e.png", "./graphics/door_f.png", "./graphics/door_g.png", 
         //"./graphics/door_h.png"
     //};
 // The files positions on screen
-    int posicoes[NUM_CENARIO][2] = { {0, 0}, {685, 389}, {0, 314}, {1107, 314}, 
-    {683, 328} }; //, {22, 834}, {498, 515}, {1328, 516}, {1843, 838}, {74, 217}, 
+    int posicoes[NUM_CENARIO][2] = { {0, 0} }; //, {685, 389}, {0, 314}, {1107, 314}, 
+    //{683, 328} }; //, {22, 834}, {498, 515}, {1328, 516}, {1843, 838}, {74, 217}, 
     //{674, 71}, {1187, 74}, {1795, 217}};
     
 
@@ -144,7 +145,7 @@ void DesenhaSpriteEscala(unsigned int spriteset, unsigned int frame, int x, int 
 
 void DesenhaPersonagem(Personagem *p, No *nos, Aresta *arestas, double xproportion, double yproportion);
 void MovimentaJogador(Personagem *p, No *nos, Aresta *arestas);
-void movimentaMenina(Personagem *p, No *nos, Arestas *arestas, Caminho *caminhos);
+void movimentaMenina(Personagem *p, No *nos, Aresta *arestas, Caminho *caminhos);
 void InverteJogador(Personagem *p);
 void PortasFantasma(Personagem *p);
 
@@ -175,7 +176,7 @@ void DesenhaPersonagem(Personagem *p, No *nos, Aresta *arestas, double xproporti
                     (nos[destino].x - nos[origem].x);
     ypers = nos[origem].y + ((double)p->distancia/arestas[p->aresta].distancia)*
                     (nos[destino].y - nos[origem].y);
-    C2D2P_CirculoPintado(xpers*xproportion, ypers*yproportion, 30*xproportion, 0, 0, 0);
+    C2D2P_CirculoPintado(xpers*xproportion, ypers*yproportion, 30*xproportion, 255, 0, 0);
 }
 
 void InverteJogador(Personagem *p)

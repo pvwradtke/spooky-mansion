@@ -20,14 +20,14 @@ extern "C" {
 #define NETBOOK_HEIGHT  600
 #define DESKTOP_WIDTH   1280
 #define DESKTOP_HEIGHT  1024
-#define NUM_CENARIO     5
-#define NUM_NOS         20
-#define NUM_ARESTAS     20
+#define NUM_CENARIO     1
+#define NUM_NOS         23
+#define NUM_ARESTAS     23
 
 enum{ LATERAL, VERTICAL};
 
 enum{SEM_PORTA=-1, PORTA_A, PORTA_B, PORTA_C, PORTA_D, PORTA_E, PORTA_F, PORTA_G,
-PORTA_H, NUM_PORTAS};
+NUM_PORTAS};
 
 enum {DIREITA, ESQUERDA, CIMA, BAIXO};
 
@@ -60,7 +60,7 @@ typedef struct Personagem
     int distancia;
     int direcao;
     int caminho;
-    int aresta;
+    int indice;
     bool invertido;
 }Personagem;
     
@@ -69,7 +69,7 @@ typedef struct Caminho
     int origem;
     int destino;
     int numarestas;
-    int arestas[8];
+    int arestas[12];
 }Caminho;
     
 #ifdef	__cplusplus
