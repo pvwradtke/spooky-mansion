@@ -794,8 +794,8 @@ bool Jogo() {
 
 int main(int ac, char **av) {
     // A resolução da tela
-    width =  HD_WIDTH;
-    height = HD_HEIGHT;
+    width =  NETBOOK_WIDTH;
+    height = NETBOOK_HEIGHT;
     // As proporções da tela
     xprop = (double) width / FULLHD_WIDTH;
     yprop = (double) height / FULLHD_HEIGHT;
@@ -811,7 +811,7 @@ int main(int ac, char **av) {
     ////////////////////////////
     //tela escolha resolução //
     //////////////////////////
-    if (!C2D2_Inicia(width, height, C2D2_TELA_CHEIA, C2D2_DESENHO_OPENGL, (char*) "Spooky Mansion")) {
+    if (!C2D2_Inicia(width, height, C2D2_JANELA, C2D2_DESENHO_OPENGL, (char*) "Spooky Mansion")) {
         printf("Nao conseguiu iniciar a tela. Encerrando.\n");
         return 1;
     }
